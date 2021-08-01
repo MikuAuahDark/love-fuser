@@ -19,9 +19,13 @@ jobs:
     - name: Download Prebuilt Zip Files
       shell: cmd
       run: curl -Lo love.zip "%LOVE_ZIP%"
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        version: '3.x'
     - name: Install JSMin (Python Package)
       shell: cmd
-      run: python3.9 -m pip install jsmin
+      run: python -m pip install jsmin
     - name: Install ImageMagick
       shell: cmd
       run: choco install imagemagick.app -PackageParameters NoDesktop=true
@@ -49,11 +53,11 @@ jobs:
     - name: Setup General Metadata
       id: md
       shell: cmd
-      run: cd game && python3.9 scripts\get_metadata.py --set-output name version author description
+      run: cd game && python scripts\get_metadata.py --set-output name version author description
     - name: Setup Windows-specific Metadata
       id: exe
       shell: cmd
-      run: cd game && python3.9 scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon fileVersion
+      run: cd game && python scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon fileVersion
     - name: Copy Original Executable
       shell: cmd
       run: copy lovebuild\${{ steps.exe.outputs.loveExe }} game.exe
