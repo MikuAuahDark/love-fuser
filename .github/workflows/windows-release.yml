@@ -29,6 +29,11 @@ jobs:
     - name: Install ImageMagick
       shell: cmd
       run: choco install imagemagick.app -PackageParameters NoDesktop=true
+    - name: Setup ImageMagick Path
+      shell: powershell
+      run: |
+        $MagickPath = (Get-ItemProperty -Path HKLM:\SOFTWARE\ImageMagick\Current -Name BinPath).BinPath
+        [IO.File]::WriteAllLines($env:GITHUB_PATH, $MagickPath)
     - name: Download RCEdit
       shell: cmd
       run: curl -Lo bin/rcedit.exe https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe
