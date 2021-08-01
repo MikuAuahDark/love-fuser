@@ -1,0 +1,48 @@
+{
+	// The name of the game
+	"name": "Duckloon",
+	// The game version
+	// Please specify at least correct version numbers. Some platforms are picky
+	// of the version string specified!
+	"version": "11.0",
+	// The game author(s)
+	"author": "LOVE Development Team",
+	// The game description
+	"description": "L\u00D6VE 11.0 no-game screen.",
+
+	// Windows-specific settings. If this is set to null and Windows workflow is
+	// enabled, then the workflow will error!
+	"windows": {
+		// Windows-specific game icon. If this is null, then no attempt is made to
+		// change the icon.
+		"icon": null,
+		// Should it fuse with lovec.exe instead of love.exe? lovec.exe always have
+		// console window associated with it regardless of t.console setting in
+		// conf.lua
+		"lovec": false,
+		// Resulting executable name.
+		"exeName": "game.exe",
+		// Extra files to copy to the game. If this is null, then no attempt is made
+		// to copy extra files.
+		// CAVEAT: Paths are relative to repository and path separator is backslash!
+		// Example: "windows\\extrafiles"
+		"extraFiles": null
+	},
+
+	// Android-specific settings. If this is set to null and Android workflow is
+	// enabled, then the workflow will error!
+	"android": {
+		// Internal version number for the Android Application
+		"versionNumber": 1,
+		// Android package name
+		"packageName": "org.love2d.android.nogame",
+		// Is the game uses microphone input? If so, set this to true. This ensure
+		// correct AndroidManifest.xml is generated. If this field is null, then
+		// it will try to deduce the value from the game conf.lua.
+		// CAVEAT: conf.lua detection is simple and may fail lots of edge cases!
+		"useMicrophone": null,
+		// Android-specific game icon. If this is null, then no attempt is made to
+		// change the icon.
+		"icon": null
+	}
+}

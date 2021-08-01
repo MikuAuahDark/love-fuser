@@ -1,0 +1,102 @@
+on: push
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        file: [win32, win64]
+    env:
+      # URL where to find the prebuilt LOVE binaries
+      LOVE_ZIP: https://github.com/love2d/love/releases/download/11.3/love-11.3-${{ matrix.platform }}.zip
+      # The directory inside the Zip file to extract. If the zip contains all the .exe and
+      # .dlls directly, pass empty string!
+      LOVE_ZIP_INDIR: love-11.3-${{ matrix.platform }}
+    steps:
+    - name: Create Directories
+      shell: cmd
+      run: mkdir bin lovebuild
+    - name: Download Prebuilt Zip Files
+      shell: cmd
+      run: curl -Lo love.zip "%LOVE_ZIP%"
+    - name: Install JSMin (Python Package)
+      shell: cmd
+      run: python3.9 -m pip install jsmin
+    - name: Install ImageMagick
+      shell: cmd
+      run: choco install imagemagick.app -PackageParameters NoDesktop=true
+    - name: Download RCEdit
+      shell: cmd
+      run: curl -Lo bin/rcedit.exe https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe
+    - name: Setup Path
+      shell: cmd
+      run: echo %CD%\bin >> %GITHUB_PATH%
+    - name: Unzip
+      shell: cmd
+      run: 7z -olovebuild x love.zip
+    - name: Move All Files If Needed
+      shell: cmd
+      run: |
+        if not "%LOVE_ZIP_INDIR%"=="" (
+          move /Y "lovebuild\%LOVE_ZIP_INDIR%\*" "lovebuild"
+          rmdir /S /Q "lovebuild\%LOVE_ZIP_INDIR%"
+        )
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        path: game
+        submodules: true
+    - name: Setup General Metadata
+      id: md
+      shell: cmd
+      run: cd game && python3.9 scripts\get_metadata.py --set-output name version author description
+    - name: Setup Windows-specific Metadata
+      id: exe
+      shell: cmd
+      run: cd game && python3.9 scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon fileVersion
+    - name: Copy Original Executable
+      shell: cmd
+      run: copy lovebuild\${{ steps.exe.outputs.loveExe }} game.exe
+    - name: Modify Executable Metadata
+      shell: cmd
+      run: |
+        rcedit game.exe ^
+        --set-version-string ProductName ${{ steps.md.outputs.name }} ^
+        --set-file-version "${{ steps.md.outputs.version }}" ^
+        --set-product-version "${{ steps.md.outputs.version }}" ^
+        --set-version-string FileDescription "${{ steps.md.outputs.description }}" ^
+        --set-version-string LegalCopyright "Copyright ${{ steps.md.outputs.author }}" ^
+        --set-version-string OriginalFilename ${{ steps.exe.outputs.loveExe }}
+    - name: Change Icon if Necessary
+      shell: cmd
+      env:
+        GAME_ICON: ${{ steps.exe.outputs.icon }}
+      run: |
+        echo Icon: %GAME_ICON%
+        if not "%GAME_ICON"=="" (
+          magick convert "game/%GAME_ICON%" -resize 256x256 -gravity center -background transparent -extent 256x256 -depth 8 icon.png
+          magick convert icon.png -define icon:auto-resize=16,32,48,64,128,256 icon.ico
+          rcedit game.exe --set-icon icon.ico
+        )
+    - name: Archive Game
+      shell: cmd
+      run: cd game\game && 7z -tzip -mx9 a ..\game.love *
+    - name: Fuse
+      shell: cmd
+      run: copy /b game.exe+game.love "lovebuild\${{ steps.exe.outputs.exeName }}"
+    - name: Delete love.exe and lovec.exe
+      shell: cmd
+      run: del lovebuild\love.exe lovebuild\lovec.exe
+    - name: Copy Additional Files
+      shell: cmd
+      env:
+        EXTRA_FILES: ${{ steps.exe.outputs.extraFiles }}
+      run: if not "%EXTRA_FILES%"=="" copy "game\%EXTRA_FILES%\*" "lovebuild"
+    - name: Package
+      shell: cmd
+      run: cd lovebuild && 7z -tzip -mx9 a ..\windows-release-${{ matrix.platform }}.zip *
+    - name: Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows-release-${{ matrix.platform }}
+        path: windows-release-${{ matrix.platform }}.zip
