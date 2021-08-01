@@ -15,7 +15,7 @@
 	"windows": {
 		// Windows-specific game icon. If this is null, then no attempt is made to
 		// change the icon.
-		"icon": null,
+		"icon": "game/normal@2x.png",
 		// Should it fuse with lovec.exe instead of love.exe? lovec.exe always have
 		// console window associated with it regardless of t.console setting in
 		// conf.lua

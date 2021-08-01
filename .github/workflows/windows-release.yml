@@ -32,9 +32,6 @@ jobs:
     - name: Download RCEdit
       shell: cmd
       run: curl -Lo bin/rcedit.exe https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe
-    - name: Setup Path
-      shell: cmd
-      run: echo %CD%\bin >> %GITHUB_PATH%
     - name: Unzip
       shell: cmd
       run: 7z -olovebuild x love.zip
@@ -64,7 +61,7 @@ jobs:
     - name: Modify Executable Metadata
       shell: cmd
       run: |
-        rcedit game.exe ^
+        bin\rcedit game.exe ^
         --set-version-string ProductName ${{ steps.md.outputs.name }} ^
         --set-file-version "${{ steps.md.outputs.version }}" ^
         --set-product-version "${{ steps.md.outputs.version }}" ^
@@ -80,7 +77,7 @@ jobs:
         if not "%GAME_ICON"=="" (
           magick convert "game/%GAME_ICON%" -resize 256x256 -gravity center -background transparent -extent 256x256 -depth 8 icon.png
           magick convert icon.png -define icon:auto-resize=16,32,48,64,128,256 icon.ico
-          rcedit game.exe --set-icon icon.ico
+          bin\rcedit game.exe --set-icon icon.ico
         )
     - name: Archive Game
       shell: cmd
