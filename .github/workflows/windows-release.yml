@@ -22,7 +22,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        version: '3.x'
+        python-version: '3.x'
     - name: Install JSMin (Python Package)
       shell: cmd
       run: python -m pip install jsmin
@@ -57,7 +57,7 @@ jobs:
     - name: Setup Windows-specific Metadata
       id: exe
       shell: cmd
-      run: cd game && python scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon fileVersion
+      run: cd game && python scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon
     - name: Copy Original Executable
       shell: cmd
       run: copy lovebuild\${{ steps.exe.outputs.loveExe }} game.exe
