@@ -22,7 +22,7 @@ freely, subject to the following restrictions:
 local love = require("love")
 
 function love.conf(t)
-	t.title = "L\195\150VE " .. love._version .. " (" .. love._version_codename .. ")"
+	t.title = "Duckloon - L\195\150VE " .. love._version .. " (" .. love._version_codename .. ")"
 	t.gammacorrect = true
 	t.modules.audio = false
 	t.modules.sound = false
