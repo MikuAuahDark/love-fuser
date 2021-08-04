@@ -175,7 +175,7 @@ jobs:
       run: |
           set -e
           pushd love
-        	bash platform/unix/genmodules
+          bash platform/unix/genmodules
           cp platform/unix/configure.ac .
           cp platform/unix/Makefile.am .
           autoheader
