@@ -59,7 +59,7 @@ jobs:
     - name: Setup Windows-specific Metadata
       id: exe
       shell: cmd
-      run: cd game && python scripts\get_metadata_win.py --set-output loveExe exeName extraFiles icon
+      run: cd game && python scripts\get_metadata_windows.py --set-output loveExe exeName extraFiles icon
     - name: Copy Original Executable
       shell: cmd
       run: copy lovebuild\${{ steps.exe.outputs.loveExe }} game.exe
@@ -98,11 +98,8 @@ jobs:
       env:
         EXTRA_FILES: ${{ steps.exe.outputs.extraFiles }}
       run: if not "%EXTRA_FILES%"=="" copy "game\%EXTRA_FILES%\*" "lovebuild"
-    - name: Package
-      shell: cmd
-      run: cd lovebuild && 7z -tzip -mx9 a ..\windows-release-${{ matrix.platform }}.zip *
-    - name: Artifact
+    - name: Package & Artifact
       uses: actions/upload-artifact@v2
       with:
         name: windows-release-${{ matrix.platform }}
-        path: windows-release-${{ matrix.platform }}.zip
+        path: lovebuild/

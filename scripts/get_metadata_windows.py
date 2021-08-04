@@ -13,11 +13,13 @@ if __name__ == '__main__':
     with open('metadata.json', 'r', encoding='UTF-8') as f:
         metadata = json.loads(jsmin(f.read()))
     for name in args.name:
-        # Special case: Prevent "windows" and "android" fields
-        if name == 'windows' or name == 'android':
-            raise RuntimeError("'windows' and 'android' fields are forbidden.")
+        # Special case: loveExe
+        if name == 'loveExe':
+            value = 'lovec.exe' if metadata['windows']['lovec'] else 'love.exe'
+        elif name == 'fileVersion':
+            value = metadata['windows']['fileVersion'] or metadata['version']
         else:
-            value = metadata[name] or ''
+            value = metadata['windows'][name] or ''
         # Print
         if args.set_output:
             print(f"::set-output name={name}::{value}")
