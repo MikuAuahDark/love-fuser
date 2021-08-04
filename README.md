@@ -10,9 +10,17 @@ Usage
 
 Before fusing your game, enable/disable the workflow files for particular platform. Available workflows are:
 
-* `windows-release` - Package your game using officially released LOVE binaries.
+* `windows-release` - Package your game for Windows using officially released LOVE binaries.
+
+* `linux-source` - Package your game for Linux with AppImages by compiling LOVE and its dependencies from source.
 
 Afterwards, put all your game source code into `game` folder, or use submodules.
+
+AppImage Notes
+=====
+
+It's possible to extract the AppImage contents and package the game as tarball if special modifications are needed.
+It's compiled with relocatibility in-mind so running it without packaging it into AppImage first is already sufficient.
 
 License
 =====

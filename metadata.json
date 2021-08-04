@@ -29,6 +29,17 @@
 		"extraFiles": null
 	},
 
+	// Linux-specific settings. If this is set to null and Linux workflow is enabled
+	// then the workflow will error!
+	"linux": {
+		// Linux-specific game icon. If this is null, then default LOVE icon is used.
+		"icon": "game/normal@2x.png",
+		// Additional category for the desktop entry.
+		// See https://www.freedesktop.org/wiki/Specifications/menu-spec/ for more
+		// information.
+		"additionalCategory": ["Game"]
+	},
+
 	// Android-specific settings. If this is set to null and Android workflow is
 	// enabled, then the workflow will error!
 	"android": {

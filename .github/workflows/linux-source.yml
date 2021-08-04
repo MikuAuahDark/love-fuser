@@ -1,0 +1,218 @@
+on: push
+
+jobs:
+  linux:
+    runs-on: ubuntu-18.04
+    env:
+      # = Git-based dependencies =
+      # Normally, it's not recommended to use actual "branch" since it may result
+      # in non-reproducible builds (because branches change often). Instead,
+      # commit hash or tag is preferred.
+
+      # Which LOVE tree/version to use?
+      LOVE_BRANCH: "11.3"
+      # Which LuaJIT tree/version to use?
+      LUAJIT_BRANCH: "983d66b8c5032b421e0f5fe8d39e9930bceb7031"
+      # Which SDL2 tree/version to use?
+      SDL2_BRANCH: release-2.0.14
+      # Which OpenAL-soft tree/version to use?
+      OPENAL_BRANCH: "1.21.1"
+      # Which Brotli tree/version to use?
+      BROTLI_BRANCH: v1.0.9
+      # Which zlib tree/version to use?
+      ZLIB_BRANCH: v1.2.11
+
+      # = Tarball-based dependencies =
+      # For these, an exact version number is required as tarballs will be downloaded
+      # instead of checkouts.
+
+      # Which version of Ogg to use?
+      LIBOGG_VERSION: "1.3.4"
+      # Which version of Vorbis to use?
+      LIBVORBIS_VERSION: "1.3.7"
+      # Which version of Theora to use?
+      LIBTHEORA_VERSION: "1.2.0alpha1"
+      # Which version of libpng to use?
+      LIBPNG_VERSION: "1.6.37"
+      # Which version of Freetype2 to use?
+      FT_VERSION: "2.11.0"
+      # Which version of BZip2 to use?
+      BZIP2_VERSION: "1.0.8"
+      # Which version of Mpg123 to use? Note that LOVE 12.0 (development) does not require
+      # Mpg123 to build.
+      MPG123_VERSION: "1.27.2"
+      # Which version of libmodplug to use?
+      LIBMODPLUG_VERSION: "0.8.8.5"
+
+      # Special
+      CMAKE_DOWNLOAD_URL: https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-linux-x86_64.sh
+      APPIMAGETOOL_DOWNLOAD_URL: https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+    steps:
+    - name: Create Directories
+      run: mkdir bin installdir
+    - name: Download Dependencies
+      run: |
+        sudo apt-get install build-essential git make cmake autoconf automake \
+        libtool pkg-config libasound2-dev libpulse-dev libaudio-dev libjack-dev \
+        libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+        libxinerama-dev libxxf86vm-dev libxss-dev libgl1-mesa-dev libdbus-1-dev \
+        libudev-dev libgles2-mesa-dev libegl1-mesa-dev libibus-1.0-dev \
+        fcitx-libs-dev libsamplerate0-dev libsndio-dev libwayland-dev \
+        libxkbcommon-dev libdrm-dev libgbm-dev curl
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install JSMin (Python Package)
+      run: python -m pip install jsmin
+    - name: Download AppImageTool
+      run: curl -Lfo bin/appimagetool $APPIMAGETOOL_DOWNLOAD_URL && chmod u+x bin/appimagetool
+    # If you're sure that the system CMake that the GitHub runner uses is at least
+    # 3.13.1, then feel free to remove these 3 steps below
+    - name: Download Better CMake
+      run: curl -Lfo cmake_install.sh $CMAKE_DOWNLOAD_URL && chmod u+x cmake_install.sh
+    - name: Install Better CMake
+      run: ./cmake_install.sh --prefix=$PWD/cmake --skip-license
+    - name: Add Better CMake to PATH
+      run: realpath cmake/bin >> $GITHUB_PATH
+    # End of Better CMake related steps
+    - name: Add bin to PATH
+      run: realpath bin >> $GITHUB_PATH
+    - name: Set $INSTALLPREFIX
+      run: echo "INSTALLPREFIX=`realpath installdir`" >> $GITHUB_ENV
+    - name: Checkout LÖVE
+      uses: actions/checkout@v2
+      with:
+        repository: love2d/love
+        ref: ${{ env.LOVE_BRANCH }}
+        path: love
+    - name: Checkout LuaJIT
+      uses: actions/checkout@v2
+      with:
+        repository: LuaJIT/LuaJIT
+        ref: ${{ env.LUAJIT_BRANCH }}
+        path: luajit
+    - name: Checkout SDL
+      uses: actions/checkout@v2
+      with:
+        repository: libsdl-org/SDL
+        ref: ${{ env.SDL2_BRANCH }}
+        path: sdl2
+    - name: Checkout OpenAL-soft
+      uses: actions/checkout@v2
+      with:
+        repository: kcat/openal-soft
+        ref: ${{ env.OPENAL_BRANCH }}
+        path: openal
+    - name: Checkout Brotli
+      uses: actions/checkout@v2
+      with:
+        repository: google/brotli
+        ref: ${{ env.BROTLI_BRANCH }}
+        path: brotli
+    - name: Checkout zLib
+      uses: actions/checkout@v2
+      with:
+        repository: madler/zlib
+        ref: ${{ env.ZLIB_BRANCH }}
+        path: zlib
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: game
+    - name: Download Tarball Dependencies
+      run: |
+        set -e
+        DOWNLOAD="python game/scripts/download_deps_linux.py"
+        $DOWNLOAD http://downloads.xiph.org/releases/ogg/libogg-$LIBOGG_VERSION.tar.gz ogg
+        $DOWNLOAD http://downloads.xiph.org/releases/vorbis/libvorbis-$LIBVORBIS_VERSION.tar.gz vorbis
+        $DOWNLOAD http://downloads.xiph.org/releases/theora/libtheora-$LIBTHEORA_VERSION.tar.gz theora
+        $DOWNLOAD http://prdownloads.sourceforge.net/libpng/libpng-$LIBPNG_VERSION.tar.gz?download png
+        $DOWNLOAD https://download.savannah.gnu.org/releases/freetype/freetype-$FT_VERSION.tar.gz ft
+        $DOWNLOAD https://sourceware.org/pub/bzip2/bzip2-$BZIP2_VERSION.tar.gz bz2
+        $DOWNLOAD https://www.mpg123.de/download/mpg123-$MPG123_VERSION.tar.bz2 mpg123
+        # Modplug is manual
+        LIBMODPLUG_FILE=libmodplug-$LIBMODPLUG_VERSION
+        curl -Lfo $LIBMODPLUG_FILE http://sourceforge.net/projects/modplug-xmms/files/libmodplug/$LIBMODPLUG_VERSION/$LIBMODPLUG_FILE.tar.gz/download
+        tar xzf $LIBMODPLUG_FILE
+        mv $LIBMODPLUG_FILE libmodplug
+    - name: Compile Ogg
+      run: bash game/scripts/make_autotools_linux.sh ogg
+    - name: Compile Vorbis
+      run: bash game/scripts/make_autotools_linux.sh vorbis
+    - name: Compile Theora
+      run: bash game/scripts/make_autotools_linux.sh theora
+    - name: Compile zLib
+      run: bash game/scripts/make_autotools_linux.sh zlib
+    - name: Compile libpng
+      run: bash game/scripts/make_autotools_linux.sh png
+    - name: Compile Brotli
+      run: bash game/scripts/make_cmake_linux.sh brotli
+    - name: Compile BZip2
+      run: |
+        set -e
+        pushd bz2
+        make install -j`nproc` CFLAGS="-Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64" LDFLAGS="-Wl,-rpath,'\$ORIGIN/../lib'" PREFIX=$INSTALLPREFIX
+        popd
+    - name: Compile FreeType
+      run: CFLAGS="-I$INSTALLPREFIX/include" LDFLAGS="-L$INSTALLPREFIX/lib -Wl,--no-undefined" bash game/scripts/make_autotools_linux.sh ft
+    - name: Compile OpenAL-soft
+      run: bash game/scripts/make_cmake_linux.sh openal
+    - name: Compile SDL2
+      run: bash game/scripts/make_autotools_linux.sh sdl2
+    - name: Compile LuaJIT
+      run: |
+        set -e
+        pushd luajit
+        LDFLAGS="-Wl,-rpath,'\$ORIGIN/../lib'" make amalg -j`nproc` PREFIX=/usr
+        make install PREFIX=$INSTALLPREFIX
+        popd
+    - name: Compile Mpg123
+      run: bash game/scripts/make_autotools_linux.sh mpg123
+    - name: Compile libmodplug
+      run: bash game/scripts/make_autotools_linux.sh libmodplug
+    - name: Prepare LÖVE
+      run: |
+          set -e
+          pushd love
+        	bash platform/unix/genmodules
+          cp platform/unix/configure.ac .
+          cp platform/unix/Makefile.am .
+          autoheader
+          libtoolize --force
+          aclocal -I $INSTALLPREFIX/share/aclocal
+          autoconf -I$INSTALLPREFIX
+          automake -a
+          popd
+    - name: Compile LÖVE
+      run: CFLAGS="-I$INSTALLPREFIX/include" LDFLAGS="-L$INSTALLPREFIX/lib" bash game/scripts/make_autotools_linux.sh love
+    - name: List Files in $INSTALLPREFIX
+      run: find $INSTALLPREFIX -type f
+    # If you want to strip binaries later, remove this step.
+    - name: Prepare & Strip Binaries
+      run: |
+        set -e
+        ! rm -rf $INSTALLPREFIX/share/man
+        ! rm -rf $INSTALLPREFIX/share/doc
+        ! rm -rf $INSTALLPREFIX/share/openal
+        ! rm -rf $INSTALLPREFIX/lib/mpg123
+        ! rm -rf $INSTALLPREFIX/lib/cmake
+        ! rm -rf $INSTALLPREFIX/lib/pkgconfig
+        ! rm -rf $INSTALLPREFIX/lib/*.a
+        ! rm -rf $INSTALLPREFIX/lib/*.la
+        ! rm -rf $INSTALLPREFIX/lib/*.la
+        ! rm -rf $INSTALLPREFIX/include
+        ! rm -rf $INSTALLPREFIX/man
+        ! find $INSTALLPREFIX/bin -type l -exec rm -rf {} +
+        ! find $INSTALLPREFIX/bin ! -name 'luajit*' ! -name 'love' -type f -exec rm -f {} +
+        ! strip $INSTALLPREFIX/lib/*
+    # End of strip binaries
+    - name: Prepare Directory for Packaging
+      run: cd game && python scripts/prepare_appimage_linux.py
+    - name: Package
+      run: appimagetool $INSTALLPREFIX linux-source-x86_64.AppImage
+    - name: Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux-source-x86_64
+        path: linux-source-x86_64.AppImage
