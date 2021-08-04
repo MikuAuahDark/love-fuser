@@ -49,7 +49,7 @@ jobs:
       APPIMAGETOOL_DOWNLOAD_URL: https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
     steps:
     - name: Create Directories
-      run: mkdir bin installdir
+      run: mkdir bin installdir cmake
     - name: Download Dependencies
       run: |
         sudo apt-get install build-essential git make cmake autoconf automake \
