@@ -141,11 +141,11 @@ jobs:
     - name: Compile Vorbis
       run: bash game/scripts/make_autotools_linux.sh vorbis
     - name: Compile Theora
-      run: bash game/scripts/make_autotools_linux.sh theora
+      run: bash game/scripts/make_autotools_linux.sh theora --with-ogg=$INSTALLPREFIX --with-vorbis=$INSTALLPREFIX --disable-examples --disable-encode
     - name: Compile zLib
       run: bash game/scripts/make_autotools_linux.sh zlib
     - name: Compile libpng
-      run: bash game/scripts/make_autotools_linux.sh png
+      run: LDFLAGS="-L$INSTALLPREFIX/lib" CFLAGS="-I$INSTALLPREFIX/include" CPPFLAGS="-I$INSTALLPREFIX/include" bash game/scripts/make_autotools_linux.sh png
     - name: Compile Brotli
       run: bash game/scripts/make_cmake_linux.sh brotli
     - name: Compile BZip2
