@@ -15,7 +15,6 @@ Type=Application
 Categories={realcat}
 Terminal=false
 Icon=game
-PrefersNonDefaultGPU=true
 """
 
 def load_metadata(path):
