@@ -152,7 +152,7 @@ jobs:
       run: |
         set -e
         pushd bz2
-        make install -j`nproc` CFLAGS="-Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64" LDFLAGS="-Wl,-rpath,'\$ORIGIN/../lib'" PREFIX=$INSTALLPREFIX
+        make install -j`nproc` CFLAGS="-fPIC -Wall -Winline -O2 -g -D_FILE_OFFSET_BITS=64" LDFLAGS="-Wl,-rpath,'\$ORIGIN/../lib'" PREFIX=$INSTALLPREFIX
         popd
     - name: Compile FreeType
       run: CFLAGS="-I$INSTALLPREFIX/include" LDFLAGS="-L$INSTALLPREFIX/lib -Wl,--no-undefined" bash game/scripts/make_autotools_linux.sh ft
