@@ -43,9 +43,12 @@
 	// Android-specific settings. If this is set to null and Android workflow is
 	// enabled, then the workflow will error!
 	"android": {
-		// Internal version number for the Android Application
+		// Internal version number for the Android Application. If you release new
+		// version of your game (including minor and patch version), increment this
+		// value!
 		"versionNumber": 1,
-		// Android package name
+		// Android package name. See https://developer.android.com/studio/build/application-id
+		// for more information!
 		"packageName": "org.love2d.android.nogame",
 		// Is the game uses microphone input? If so, set this to true. This ensure
 		// correct AndroidManifest.xml is generated. If this field is null, then
