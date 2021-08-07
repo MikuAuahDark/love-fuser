@@ -120,6 +120,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: game
+        submodules: true
     - name: Download Tarball Dependencies
       run: |
         set -e

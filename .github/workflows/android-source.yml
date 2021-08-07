@@ -7,6 +7,9 @@ jobs:
       # Which LOVE Android tree/version to use?
       # Currently "master" branch is required if you need to target Android 11.
       LOVE_ANDROID_BRANCH: "master"
+      # Which LOVE branch to use? By default, the ones shipped with the submodules
+      # is used.
+      LOVE_BRANCH: ''
       # Enable "experiment" packaging (0/1).
       # Experiment packaging packages all your game inside the APK into assets folder
       # directly without packaging it first into game.love.
@@ -31,18 +34,26 @@ jobs:
       run: curl -Lfo bin/magick https://github.com/ImageMagick/ImageMagick/releases/download/7.1.0-4/ImageMagick-5369493-gcc-x86_64.AppImage
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
-    - name: Checkout LÖVE Android
+    - name: Checkout  Android
       uses: actions/checkout@v2
       with:
         repository: love2d/love-android
         ref: ${{ env.LOVE_ANDROID_BRANCH }}
         path: love-android
+        submodules: ${{ env.LOVE_BRANCH == ''}}
+    - name: Checkout LÖVE
+      uses: actions/checkout@v2
+      if: ${{ env.LOVE_BRANCH != ''}}
+      with:
+        path: love-android/love/src/jni/love
+        ref: ${{ env.LOVE_BRANCH }}
     - name: Set $LOVEANDROID
       run: echo "LOVEANDROID=`realpath love-android`" >> $GITHUB_ENV
     - name: Checkout
       uses: actions/checkout@v2
       with:
         path: game
+        submodules: true
     - name: Prepare Metadata
       id: md
       run: cd game && python scripts/prepare_android.py --get-icon-path --commit
