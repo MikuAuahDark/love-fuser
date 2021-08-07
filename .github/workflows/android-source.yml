@@ -34,7 +34,7 @@ jobs:
       run: curl -Lfo bin/magick https://github.com/ImageMagick/ImageMagick/releases/download/7.1.0-4/ImageMagick-5369493-gcc-x86_64.AppImage
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
-    - name: Checkout  Android
+    - name: Checkout LÖVE Android
       uses: actions/checkout@v2
       with:
         repository: love2d/love-android

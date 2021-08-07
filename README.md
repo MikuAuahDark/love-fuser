@@ -14,6 +14,8 @@ Before fusing your game, enable/disable the workflow files for particular platfo
 
 * `linux-source` - Package your game for Linux with AppImages by compiling LOVE and its dependencies from source.
 
+* `android-source` - Package your game for Android by compiling love-android fro source. AAB and debug APK is provided as artifacts.
+
 Afterwards, put all your game source code into `game` folder, or use submodules.
 
 AppImage Notes
