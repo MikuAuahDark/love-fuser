@@ -209,6 +209,10 @@ jobs:
     # End of strip binaries
     - name: Prepare Directory for Packaging
       run: cd game && python scripts/prepare_appimage_linux.py
+    - name: Compile AppRun
+      run: gcc -o $INSTALLPREFIX/AppRun -O2 -fPIC game/scripts/apprun_linux.c
+    - name: Copy Game
+      run: cp -r game/game $INSTALLPREFIX/share/lovegame
     - name: Package
       run: appimagetool $INSTALLPREFIX linux-source-x86_64.AppImage
     - name: Artifact
