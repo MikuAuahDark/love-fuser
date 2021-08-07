@@ -157,7 +157,7 @@ jobs:
     - name: Compile FreeType
       run: CFLAGS="-I$INSTALLPREFIX/include" LDFLAGS="-L$INSTALLPREFIX/lib -Wl,--no-undefined" bash game/scripts/make_autotools_linux.sh ft
     - name: Compile OpenAL-soft
-      run: bash game/scripts/make_cmake_linux.sh openal
+      run: bash game/scripts/make_cmake_linux.sh openal -DALSOFT_EXAMPLES=0 -DALSOFT_BACKEND_SNDIO=0
     - name: Compile SDL2
       run: bash game/scripts/make_autotools_linux.sh sdl2
     - name: Compile LuaJIT
