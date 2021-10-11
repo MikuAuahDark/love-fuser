@@ -19,10 +19,6 @@ jobs:
     - name: Download Prebuilt Zip Files
       shell: cmd
       run: curl -Lo love.zip "%LOVE_ZIP%"
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
     - name: Install JSMin (Python Package)
       shell: cmd
       run: python -m pip install jsmin
