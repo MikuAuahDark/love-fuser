@@ -59,10 +59,6 @@ jobs:
         libudev-dev libgles2-mesa-dev libegl1-mesa-dev libibus-1.0-dev \
         fcitx-libs-dev libsamplerate0-dev libsndio-dev libwayland-dev \
         libxkbcommon-dev libdrm-dev libgbm-dev curl
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
     - name: Download AppImageTool
