@@ -29,7 +29,7 @@ It's compiled with relocatibility in-mind so running it without packaging it int
 License
 =====
 
-* An example "game" (LOVE 11.0 no-game screen) is placed in `game`- zlib license.
+* An example "game" (LOVE 0.10.x no-game screen **modified** to run in 11.x) is placed in `game` by LOVE Development Team - zlib license.
 
 * `game/30log.lua` - MIT license
 
