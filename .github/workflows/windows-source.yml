@@ -1,0 +1,124 @@
+on: push
+
+jobs:
+  windows-source:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        # TODO: Add ARM64 once LOVE 12.0 is released.
+        platform: [Win32, x64]
+    env:
+      # Which LOVE repository to use? It's in form `user/repository` and currently
+      # only GitHub repository is supported.
+      # If you have your own LOVE fork then change LOVE repository used in here.
+      # If you have your own megasource (see below) and libs/love is a submodule
+      # to your own LOVE fork, set this to blank!
+      LOVE_REPOSITORY: love2d/love
+      # Which LOVE tree/version to use? Unused if LOVE_REPOSITORY is blank.
+      LOVE_BRANCH: main
+      # Which Megasource repository to use? It's in form `user/repository` and currently
+      # only GitHub repository is supported.
+      # If you have your own change (i.e. updated libraries) for your custom build,
+      # change the Megasource used in here.
+      MEGASOURCE_REPOSITORY: love2d/megasource
+      # Which Megasource tree/version to use?
+      MEGASOURCE_BRANCH: main
+    steps:
+    - name: Create Directories
+      shell: cmd
+      run: mkdir bin lovebuild
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install JSMin (Python Package)
+      shell: cmd
+      run: python -m pip install jsmin
+    - name: Install ImageMagick
+      shell: cmd
+      run: choco install imagemagick.app -PackageParameters NoDesktop=true
+    - name: Setup ImageMagick Path
+      shell: powershell
+      run: |
+        $MagickPath = (Get-ItemProperty -Path HKLM:\SOFTWARE\ImageMagick\Current -Name BinPath).BinPath
+        [IO.File]::WriteAllLines($env:GITHUB_PATH, $MagickPath)
+    - name: Download RCEdit
+      shell: cmd
+      run: curl -Lo bin/rcedit.exe https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        path: game
+        submodules: true
+    - name: Checkout Megasource
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.MEGASOURCE_REPOSITORY }}
+        ref: ${{ env.MEGASOURCE_BRANCH }}
+        path: megasource
+        submodules: true
+    - name: Checkout LÖVE
+      if: ${{ env.LOVE_REPOSITORY != ''}}
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.LOVE_REPOSITORY }}
+        ref: ${{ env.LOVE_BRANCH }}
+        path: megasource/libs/love
+        submodules: true
+    - name: Configure
+      shell: cmd
+      run: cmake -Bmegasourcebuild -Smegasource -DCMAKE_INSTALL_PREFIX=%CD%\lovebuild -A ${{ matrix.platform }}
+    - name: Build
+      shell: cmd
+      run: cmake --build megasourcebuild --config Release --target install
+    - name: Setup General Metadata
+      id: md
+      shell: cmd
+      run: cd game && python scripts\get_metadata.py --set-output name version author description
+    - name: Setup Windows-specific Metadata
+      id: exe
+      shell: cmd
+      run: cd game && python scripts\get_metadata_windows.py --set-output loveExe exeName extraFiles icon
+    - name: Copy Original Executable
+      shell: cmd
+      run: copy lovebuild\${{ steps.exe.outputs.loveExe }} game.exe
+    - name: Modify Executable Metadata
+      shell: cmd
+      run: |
+        bin\rcedit game.exe ^
+        --set-version-string ProductName ${{ steps.md.outputs.name }} ^
+        --set-file-version "${{ steps.md.outputs.version }}" ^
+        --set-product-version "${{ steps.md.outputs.version }}" ^
+        --set-version-string FileDescription "${{ steps.md.outputs.description }}" ^
+        --set-version-string LegalCopyright "Copyright ${{ steps.md.outputs.author }}" ^
+        --set-version-string OriginalFilename ${{ steps.exe.outputs.loveExe }}
+    - name: Change Icon if Necessary
+      shell: cmd
+      env:
+        GAME_ICON: ${{ steps.exe.outputs.icon }}
+      run: |
+        echo Icon: %GAME_ICON%
+        if not "%GAME_ICON"=="" (
+          magick convert "game/%GAME_ICON%" -resize 256x256 -gravity center -background transparent -extent 256x256 -depth 8 icon.png
+          magick convert icon.png -define icon:auto-resize=16,32,48,64,128,256 icon.ico
+          bin\rcedit game.exe --set-icon icon.ico
+        )
+    - name: Archive Game
+      shell: cmd
+      run: cd game\game && 7z -tzip -mx9 a ..\game.love *
+    - name: Fuse
+      shell: cmd
+      run: copy /b game.exe+game.love "lovebuild\${{ steps.exe.outputs.exeName }}"
+    - name: Delete love.exe and lovec.exe
+      shell: cmd
+      run: del lovebuild\love.exe lovebuild\lovec.exe
+    - name: Copy Additional Files
+      shell: cmd
+      env:
+        EXTRA_FILES: ${{ steps.exe.outputs.extraFiles }}
+      run: if not "%EXTRA_FILES%"=="" copy "game\%EXTRA_FILES%\*" "lovebuild"
+    - name: Package & Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows-source-${{ matrix.platform }}
+        path: lovebuild/
