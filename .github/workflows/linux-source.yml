@@ -12,9 +12,9 @@ jobs:
       # Which LOVE tree/version to use?
       LOVE_BRANCH: "11.3"
       # Which LuaJIT tree/version to use?
-      LUAJIT_BRANCH: "983d66b8c5032b421e0f5fe8d39e9930bceb7031"
+      LUAJIT_BRANCH: "bfd076532cdf1159df13499392879f5f4d3a9a5d"
       # Which SDL2 tree/version to use?
-      SDL2_BRANCH: release-2.0.14
+      SDL2_BRANCH: release-2.0.16
       # Which OpenAL-soft tree/version to use?
       OPENAL_BRANCH: "1.21.1"
       # Which Brotli tree/version to use?

@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       # Which LOVE Android tree/version to use?
-      # Currently "master" branch is required if you need to target Android 11.
-      LOVE_ANDROID_BRANCH: "master"
+      # Currently "main" branch is required if you need to target Android 11.
+      LOVE_ANDROID_BRANCH: "main"
       # Which LOVE branch to use? By default, the ones shipped with the submodules
       # is used.
       LOVE_BRANCH: ''
