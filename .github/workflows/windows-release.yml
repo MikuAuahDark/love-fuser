@@ -67,7 +67,7 @@ jobs:
       shell: cmd
       run: |
         bin\rcedit game.exe ^
-        --set-version-string ProductName ${{ steps.md.outputs.name }} ^
+        --set-version-string ProductName "${{ steps.md.outputs.name }}" ^
         --set-file-version "${{ steps.md.outputs.version }}" ^
         --set-product-version "${{ steps.md.outputs.version }}" ^
         --set-version-string FileDescription "${{ steps.md.outputs.description }}" ^

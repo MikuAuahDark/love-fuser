@@ -32,7 +32,7 @@ jobs:
     - name: Setup cURL & 7-zip
       run: sudo apt-get install curl p7zip-full
     - name: Download ImageMagick 7
-      run: curl -Lfo bin/magick https://github.com/ImageMagick/ImageMagick/releases/download/7.1.0-4/ImageMagick-5369493-gcc-x86_64.AppImage
+      run: curl -Lfo bin/magick https://github.com/ImageMagick/ImageMagick/releases/download/7.1.0-4/ImageMagick-5369493-gcc-x86_64.AppImage && chmod u+x bin/magick
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
     - name: Checkout LÖVE Android

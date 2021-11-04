@@ -45,8 +45,11 @@ jobs:
       LIBMODPLUG_VERSION: "0.8.8.5"
 
       # Special
-      CMAKE_DOWNLOAD_URL: https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-linux-x86_64.sh
+      CMAKE_DOWNLOAD_URL: https://github.com/Kitware/CMake/releases/download/v3.21.4/cmake-3.21.4-linux-x86_64.sh
       APPIMAGETOOL_DOWNLOAD_URL: https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+      
+      # Strip binaries?
+      STRIP_BINARIES: true
     steps:
     - name: Create Directories
       run: mkdir bin installdir cmake
@@ -191,6 +194,7 @@ jobs:
       run: find $INSTALLPREFIX -type f
     # If you want to strip binaries later, remove this step.
     - name: Prepare & Strip Binaries
+      if: ${{ env.STRIP_BINARIES }}
       run: |
         set -e
         ! rm -rf $INSTALLPREFIX/share/man
