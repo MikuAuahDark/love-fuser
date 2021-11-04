@@ -74,7 +74,7 @@ jobs:
         ICONFILE: game/${{ steps.md.outputs.icon }}
       run: |
         set -e
-        mkdir -p $LOVEANDROID/app/src/embed/res/drawable-{m,h,xh,xxh,xxxh}
+        mkdir -p $LOVEANDROID/app/src/embed/res/drawable-{m,h,xh,xxh,xxxh}dpi
         magick convert $ICONFILE -resize 192x192 -gravity center -background transparent -extent 192x192 -depth 8 $LOVEANDROID/app/src/embed/res/drawable-xxxhdpi/love.png
         magick convert $ICONFILE -resize 144x144 -gravity center -background transparent -extent 144x144 -depth 8 $LOVEANDROID/app/src/embed/res/drawable-xxhdpi/love.png
         magick convert $ICONFILE -resize 96x96 -gravity center -background transparent -extent 96x96 -depth 8 $LOVEANDROID/app/src/embed/res/drawable-xhdpi/love.png

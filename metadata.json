@@ -1,21 +1,21 @@
 {
 	// The name of the game
-	"name": "Duckloon",
+	"name": "Super Toast",
 	// The game version
 	// Please specify at least correct version numbers. Some platforms are picky
 	// of the version string specified!
-	"version": "11.0",
+	"version": "0.10.2",
 	// The game author(s)
 	"author": "LOVE Development Team",
 	// The game description
-	"description": "L\u00D6VE 11.0 no-game screen.",
+	"description": "L\u00D6VE 0.10.2 no-game screen.",
 
 	// Windows-specific settings. If this is set to null and Windows workflow is
 	// enabled, then the workflow will error!
 	"windows": {
 		// Windows-specific game icon. If this is null, then no attempt is made to
 		// change the icon.
-		"icon": "game/normal@2x.png",
+		"icon": "super_toast_8x.png",
 		// Should it fuse with lovec.exe instead of love.exe? lovec.exe always have
 		// console window associated with it regardless of t.console setting in
 		// conf.lua
@@ -33,7 +33,7 @@
 	// then the workflow will error!
 	"linux": {
 		// Linux-specific game icon. If this is null, then default LOVE icon is used.
-		"icon": "game/normal@2x.png",
+		"icon": "super_toast_8x.png",
 		// Additional category for the desktop entry.
 		// See https://www.freedesktop.org/wiki/Specifications/menu-spec/ for more
 		// information.
@@ -46,7 +46,7 @@
 		// Internal version number for the Android Application. If you release new
 		// version of your game (including minor and patch version), increment this
 		// value!
-		"versionNumber": 1,
+		"versionNumber": 2,
 		// Android package name. See https://developer.android.com/studio/build/application-id
 		// for more information!
 		"packageName": "org.love2d.android.nogame",
@@ -57,6 +57,6 @@
 		"useMicrophone": null,
 		// Android-specific game icon. If this is null, then no attempt is made to
 		// change the icon.
-		"icon": null
+		"icon": "super_toast_8x.png"
 	}
 }
