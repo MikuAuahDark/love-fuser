@@ -93,16 +93,15 @@ jobs:
         --set-version-string LegalCopyright "Copyright ${{ steps.md.outputs.author }}" ^
         --set-version-string OriginalFilename ${{ steps.exe.outputs.loveExe }}
     - name: Change Icon if Necessary
+      if: ${{ steps.exe.outputs.icon != '' }}
       shell: cmd
       env:
         GAME_ICON: ${{ steps.exe.outputs.icon }}
       run: |
         echo Icon: %GAME_ICON%
-        if not "%GAME_ICON"=="" (
-          magick convert "game/%GAME_ICON%" -resize 256x256 -gravity center -background transparent -extent 256x256 -depth 8 icon.png
-          magick convert icon.png -define icon:auto-resize=16,32,48,64,128,256 icon.ico
-          bin\rcedit game.exe --set-icon icon.ico
-        )
+        magick convert "game/%GAME_ICON%" -resize 256x256 -gravity center -background transparent -extent 256x256 -depth 8 icon.png
+        magick convert icon.png -define icon:auto-resize=16,32,48,64,128,256 icon.ico
+        bin\rcedit game.exe --set-icon icon.ico
     - name: Archive Game
       shell: cmd
       run: cd game\game && 7z -tzip -mx9 a ..\game.love *
@@ -113,10 +112,11 @@ jobs:
       shell: cmd
       run: del lovebuild\love.exe lovebuild\lovec.exe
     - name: Copy Additional Files
+      if: ${{ steps.exe.outputs.extraFiles != '' }}
       shell: cmd
       env:
         EXTRA_FILES: ${{ steps.exe.outputs.extraFiles }}
-      run: if not "%EXTRA_FILES%"=="" copy "game\%EXTRA_FILES%\*" "lovebuild"
+      run: copy "game\%EXTRA_FILES%\*" "lovebuild"
     - name: Package & Artifact
       uses: actions/upload-artifact@v2
       with:
