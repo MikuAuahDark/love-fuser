@@ -81,14 +81,17 @@ jobs:
         magick convert $ICONFILE -resize 72x72 -gravity center -background transparent -extent 72x72 -depth 8 $LOVEANDROID/app/src/embed/res/drawable-hdpi/love.png
         magick convert $ICONFILE -resize 48x48 -gravity center -background transparent -extent 48x48 -depth 8 $LOVEANDROID/app/src/embed/res/drawable-mdpi/love.png
     - name: Build
-      run: cd love-android && gradle assembleEmbedDebug bundleEmbedRelease
+      env:
+        BUILD_APK: ${{ steps.md.outputs.apk }}
+        BUILD_AAB: ${{ steps.md.outputs.aab }}
+      run: cd love-android && gradle $BUILD_APK $BUILD_AAB
     - name: Artifact (Bundle)
       uses: actions/upload-artifact@v2
       with:
         name: android-source-bundle
-        path: love-android/app/build/outputs/bundle/embedRelease/app-embed-release.aab
+        path: ${{ steps.md.outputs.aabpath }}
     - name: Artifact (Debug APK)
       uses: actions/upload-artifact@v2
       with:
-        name: android-source-bundle
-        path: love-android/app/build/outputs/apk/embed/debug/app-embed-debug.apk
+        name: android-source-apk
+        path: ${{ steps.md.outputs.apkpath }}

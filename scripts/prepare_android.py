@@ -64,7 +64,7 @@ if __name__ == '__main__':
         metadata['android']['useMicrophone'] = determine_micuse_from_conf("game/conf.lua")
     # Load AndroidManifest.xml
     print("Reading AndroidManifest.xml")
-    manifest = xml.etree.ElementTree.parse(f"{love_android}/app/src/embed/AndroidManifest.xml")
+    manifest = xml.etree.ElementTree.parse(f"{love_android}/app/src/main/AndroidManifest.xml")
     # Load build.gradle
     print("Reading build.gradle")
     with open(f"{love_android}/app/build.gradle", 'r', encoding='UTF-8') as f:
@@ -79,11 +79,6 @@ if __name__ == '__main__':
                 if is_candidate_activity(elem2):
                     elem2.set('{http://schemas.android.com/apk/res/android}label', metadata['name'])
                     break
-    # If mic permission is used, add it
-    if metadata['android']['useMicrophone']:
-        print("Microphone is needed. Adding uses-permission element.")
-        mic = xml.etree.ElementTree.Element('uses-permission', {'{http://schemas.android.com/apk/res/android}name': "android.permission.RECORD_AUDIO"})
-        manifest.getroot().insert(0, mic)
     # Modify build.gradle
     print("Changing build.gradle")
     build_gradle = replace_build_gradle_entry(build_gradle, 'applicationId', metadata['android']['packageName'])
@@ -97,7 +92,7 @@ if __name__ == '__main__':
     xmlmanifest = xml.etree.ElementTree.tostring(manifest.getroot(), 'UTF-8', 'xml')
     if args.commit:
         print("Writing new AndroidManifest.xml")
-        with open(f"{love_android}/app/src/embed/AndroidManifest.xml", 'wb') as f:
+        with open(f"{love_android}/app/src/main/AndroidManifest.xml", 'wb') as f:
             f.write(xmlmanifest)
         print("Writing new build.gradle")
         with open(f"{love_android}/app/build.gradle", 'w', encoding='UTF-8') as f:
@@ -107,3 +102,14 @@ if __name__ == '__main__':
         print(str(xmlmanifest, 'UTF-8'))
         print("build.gradle")
         print(build_gradle)
+    # Write build flavors variable
+    if metadata['android']['useMicrophone']:
+        print(f"::set-output name=apk::assembleEmbedRecordDebug")
+        print(f"::set-output name=aab::bundleEmbedRecordRelease")
+        print(f"::set-output name=apkpath::love-android/app/build/outputs/apk/embedRecord/debug/app-embed-record-debug.apk")
+        print(f"::set-output name=aabpath::love-android/app/build/outputs/bundle/embedRecordRelease/app-embed-record-release.aab")
+    else:
+        print(f"::set-output name=apk::assembleEmbedNoRecordDebug")
+        print(f"::set-output name=aab::bundleEmbedNoRecordRelease")
+        print(f"::set-output name=apkpath::love-android/app/build/outputs/apk/embedNoRecord/debug/app-embed-noRecord-debug.apk")
+        print(f"::set-output name=aabpath::love-android/app/build/outputs/bundle/embedNoRecordRelease/app-embed-noRecord-release.aab")
