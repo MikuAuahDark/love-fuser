@@ -8,10 +8,10 @@ jobs:
         platform: [win32, win64]
     env:
       # URL where to find the prebuilt LOVE binaries
-      LOVE_ZIP: https://github.com/love2d/love/releases/download/11.3/love-11.3-${{ matrix.platform }}.zip
+      LOVE_ZIP: https://github.com/love2d/love/releases/download/11.4/love-11.4-${{ matrix.platform }}.zip
       # The directory inside the Zip file to extract. If the zip contains all the .exe and
       # .dlls directly, pass empty string!
-      LOVE_ZIP_INDIR: love-11.3-${{ matrix.platform }}
+      LOVE_ZIP_INDIR: love-11.4-${{ matrix.platform }}
     steps:
     - name: Create Directories
       shell: cmd

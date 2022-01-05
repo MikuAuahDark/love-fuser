@@ -5,8 +5,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       # Which LOVE Android tree/version to use?
-      # Currently "main" branch is required if you need to target Android 11.
-      LOVE_ANDROID_BRANCH: "main"
+      # At least 11.4 branch is required if you need to target Android 11 and later.
+      LOVE_ANDROID_BRANCH: "11.4"
       # Which LOVE branch to use? By default, the ones shipped with the submodules
       # is used.
       LOVE_BRANCH: ''
@@ -14,6 +14,7 @@ jobs:
       # Experiment packaging packages all your game inside the APK into assets folder
       # directly without packaging it first into game.love.
       # This improve performance slightly, but only supported in LOVE 11.4 and later!
+      # https://github.com/love2d/love-android/wiki/FAQ---Frequently-Asked-Questions#whats-experimental-fusing-method
       EXPERIMENT_NEW_PACKAGING: 1
     steps:
     - name: Create Directories

@@ -15,7 +15,7 @@ jobs:
       # to your own LOVE fork, set this to blank!
       LOVE_REPOSITORY: love2d/love
       # Which LOVE tree/version to use? Unused if LOVE_REPOSITORY is blank.
-      LOVE_BRANCH: main
+      LOVE_BRANCH: "11.4"
       # Which Megasource repository to use? It's in form `user/repository` and currently
       # only GitHub repository is supported.
       # If you have your own change (i.e. updated libraries) for your custom build,
