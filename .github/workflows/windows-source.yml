@@ -104,7 +104,7 @@ jobs:
         bin\rcedit game.exe --set-icon icon.ico
     - name: Archive Game
       shell: cmd
-      run: cd game\game && 7z -tzip -mx9 a ..\game.love *
+      run: cd game\game && 7z -tzip -mx9 a ..\..\game.love *
     - name: Fuse
       shell: cmd
       run: copy /b game.exe+game.love "lovebuild\${{ steps.exe.outputs.exeName }}"
