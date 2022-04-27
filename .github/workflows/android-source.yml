@@ -68,7 +68,7 @@ jobs:
         7z -tzip a $LOVEANDROID/app/src/embed/assets/game.love *
     - name: Copy Files into Assets
       if: ${{ env.EXPERIMENT_NEW_PACKAGING == 1 }}
-      run: cp -r game/game $LOVEANDROID/app/src/embed/assets
+      run: cp -r game/game/ $LOVEANDROID/app/src/embed/assets
     - name: Change Icon
       if: ${{ steps.md.outputs.icon != '' }}
       env:
