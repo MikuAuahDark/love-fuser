@@ -63,9 +63,9 @@ jobs:
       if: ${{ env.EXPERIMENT_NEW_PACKAGING == 0 }}
       run: |
         set -e
-        cd game/game
         git submodule init
-        git submodule update --init --recursive --remote
+        git submodule update --init --recursive --remote game
+        cd game/game
         mkdir -p $LOVEANDROID/app/src/embed/assets
         7z -tzip a $LOVEANDROID/app/src/embed/assets/game.love *
     - name: Copy Files into Assets
