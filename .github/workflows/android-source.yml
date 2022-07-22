@@ -37,14 +37,14 @@ jobs:
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
     - name: Checkout LÖVE Android
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: love2d/love-android
         ref: ${{ env.LOVE_ANDROID_BRANCH }}
         path: love-android
         submodules: ${{ env.LOVE_BRANCH == ''}}
     - name: Checkout LÖVE
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       if: ${{ env.LOVE_BRANCH != ''}}
       with:
         path: love-android/love/src/jni/love
@@ -52,10 +52,10 @@ jobs:
     - name: Set $LOVEANDROID
       run: echo "LOVEANDROID=`realpath love-android`" >> $GITHUB_ENV
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: game
-        submodules: true
+        submodules: recursive
     - name: Prepare Metadata
       id: md
       run: cd game && python scripts/prepare_android.py --get-icon-path --commit
