@@ -58,7 +58,6 @@
 		// Android-specific game icon. If this is null, then no attempt is made to
 		// change the icon.
 		"icon": "super_toast_8x.png",
-
 		//Either "landscape" or "portrait"
 		"screenOrientation": "landscape"
 	}

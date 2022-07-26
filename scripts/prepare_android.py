@@ -77,8 +77,8 @@ if __name__ == '__main__':
             # Find first main activity
             for elem2 in elem:
                 if is_candidate_activity(elem2):
+                    # Update name
                     elem2.set('{http://schemas.android.com/apk/res/android}label', metadata['name'])
-
                     # Update screen orientation
                     elem2.set("{http://schemas.android.com/apk/res/android}screenOrientation", metadata["android"]["screenOrientation"])
                     break
