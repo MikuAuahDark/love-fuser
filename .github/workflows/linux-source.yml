@@ -14,13 +14,13 @@ jobs:
       # Which LuaJIT tree/version to use?
       LUAJIT_BRANCH: "v2.1"
       # Which SDL2 tree/version to use?
-      SDL2_BRANCH: release-2.0.18
+      SDL2_BRANCH: release-2.28.1 
       # Which OpenAL-soft tree/version to use?
-      OPENAL_BRANCH: "1.21.1"
+      OPENAL_BRANCH: "1.23.1"
       # Which Brotli tree/version to use?
       BROTLI_BRANCH: v1.0.9
       # Which zlib tree/version to use?
-      ZLIB_BRANCH: v1.2.11
+      ZLIB_BRANCH: v1.2.13
 
       # = Tarball-based dependencies =
       # For these, an exact version number is required as tarballs will be downloaded
@@ -33,19 +33,21 @@ jobs:
       # Which version of Theora to use?
       LIBTHEORA_VERSION: "1.2.0alpha1"
       # Which version of libpng to use?
-      LIBPNG_VERSION: "1.6.37"
+      LIBPNG_VERSION: "1.6.39"
       # Which version of Freetype2 to use?
-      FT_VERSION: "2.11.1"
+      FT_VERSION: "2.13.0"
       # Which version of BZip2 to use?
       BZIP2_VERSION: "1.0.8"
       # Which version of Mpg123 to use? For LOVE 12.0 (development), set this to empty
       # as Mpg123 is no longer used in that particular version.
-      MPG123_VERSION: "1.29.3"
+      MPG123_VERSION: "1.31.3"
       # Which version of libmodplug to use?
       LIBMODPLUG_VERSION: "0.8.8.5"
 
       # Special
-      CMAKE_DOWNLOAD_URL: https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-linux-x86_64.sh
+      # Where to download CMake?
+      CMAKE_DOWNLOAD_URL: https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
+      # Where to download AppImageTool?
       APPIMAGETOOL_DOWNLOAD_URL: https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
       
       # Strip binaries?
@@ -63,9 +65,9 @@ jobs:
         fcitx-libs-dev libsamplerate0-dev libsndio-dev libwayland-dev \
         libxkbcommon-dev libdrm-dev libgbm-dev curl
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'
+        python-version: '>=3.10'
     - name: Install JSMin (Python Package)
       run: python -m pip install jsmin
     - name: Download AppImageTool
@@ -134,7 +136,9 @@ jobs:
         $DOWNLOAD http://prdownloads.sourceforge.net/libpng/libpng-$LIBPNG_VERSION.tar.gz?download png
         $DOWNLOAD https://download.savannah.gnu.org/releases/freetype/freetype-$FT_VERSION.tar.gz ft
         $DOWNLOAD https://sourceware.org/pub/bzip2/bzip2-$BZIP2_VERSION.tar.gz bz2
-        $DOWNLOAD https://www.mpg123.de/download/mpg123-$MPG123_VERSION.tar.bz2 mpg123
+        if [ ! -z "$MPG123_VERSION" ]; then
+          $DOWNLOAD https://www.mpg123.de/download/mpg123-$MPG123_VERSION.tar.bz2 mpg123
+        fi
         # Modplug is manual
         LIBMODPLUG_FILE=libmodplug-$LIBMODPLUG_VERSION
         curl -Lfo $LIBMODPLUG_FILE http://sourceforge.net/projects/modplug-xmms/files/libmodplug/$LIBMODPLUG_VERSION/$LIBMODPLUG_FILE.tar.gz/download
