@@ -47,7 +47,7 @@
 		// version of your game (including minor and patch version), increment this
 		// value!
 		"versionNumber": 2,
-		// Android package name. See https://developer.android.com/studio/build/application-id
+		// Android application ID. See https://developer.android.com/studio/build/application-id
 		// for more information!
 		"packageName": "org.love2d.android.nogame",
 		// Is the game uses microphone input? If so, set this to true. This ensure
@@ -58,7 +58,9 @@
 		// Android-specific game icon. If this is null, then no attempt is made to
 		// change the icon.
 		"icon": "super_toast_8x.png",
-		//Either "landscape" or "portrait"
+		// Either "landscape" or "portrait".
+		// Unless you encounter an edge case, please specify your screen orientation
+		// in conf.lua using t.window.width and t.window.height.
 		"screenOrientation": "landscape"
 	}
 }
