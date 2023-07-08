@@ -48,7 +48,7 @@ def is_candidate_activity(elem):
     return False
 
 
-def replace_build_gradle_entry(build_gradle: str, key, value):
+def replace_build_gradle_entry(build_gradle: str, key: str, value):
     pos = build_gradle.find(key)
     if pos != -1:
         newline = build_gradle.find("\n", pos)
@@ -57,29 +57,31 @@ def replace_build_gradle_entry(build_gradle: str, key, value):
             return build_gradle[:valuepos] + json.dumps(value) + build_gradle[newline:]
         else:
             return build_gradle[:valuepos] + str(value) + build_gradle[newline:]
+    return build_gradle
 
 
-if __name__ == "__main__":
-    love_android = os.getenv("LOVEANDROID")
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--commit", action="store_true", help="Actually commit changes to files!")
-    parser.add_argument(
-        "--get-icon-path", action="store_true", help='Output icon path as "icon" variable to GitHub Actions.'
-    )
-    args = parser.parse_args()
-    # Load metadata
-    print("Reading metadata")
-    metadata = load_metadata("metadata.json")
-    if metadata["android"]["useMicrophone"] == None:
-        metadata["android"]["useMicrophone"] = determine_micuse_from_conf("game/conf.lua")
+def modify_app_build_gradle(love_android: str, metadata, commit: bool):
+    print("Reading app/build.gradle")
+    with open(f"{love_android}/app/build.gradle", "r", encoding="UTF-8") as f:
+        build_gradle = f.read().replace("\r\n", "\n")
+    # Modify build.gradle
+    print("Changing app/build.gradle")
+    build_gradle = replace_build_gradle_entry(build_gradle, "applicationId", metadata["android"]["packageName"])
+    build_gradle = replace_build_gradle_entry(build_gradle, "versionCode", metadata["android"]["versionNumber"])
+    build_gradle = replace_build_gradle_entry(build_gradle, "versionName", metadata["version"])
+    if commit:
+        print("Writing new app/build.gradle")
+        with open(f"{love_android}/app/build.gradle", "w", encoding="UTF-8") as f:
+            f.write(build_gradle)
+    else:
+        print("app/build.gradle")
+        print(build_gradle)
+
+
+def modify_app_name_from_manifest(love_android: str, metadata, commit: bool):
     # Load AndroidManifest.xml
     print("Reading AndroidManifest.xml")
     manifest = xml.etree.ElementTree.parse(f"{love_android}/app/src/main/AndroidManifest.xml")
-    # Load build.gradle
-    print("Reading build.gradle")
-    with open(f"{love_android}/app/build.gradle", "r", encoding="UTF-8") as f:
-        build_gradle = f.read().replace("\r\n", "\n")
-    # Modify app name from manifest
     for elem in manifest.getroot():
         if elem.tag == "application":
             # Replace the label here
@@ -95,29 +97,106 @@ if __name__ == "__main__":
                         metadata["android"]["screenOrientation"],
                     )
                     break
-    # Modify build.gradle
-    print("Changing build.gradle")
-    build_gradle = replace_build_gradle_entry(build_gradle, "applicationId", metadata["android"]["packageName"])
-    build_gradle = replace_build_gradle_entry(build_gradle, "versionCode", metadata["android"]["versionNumber"])
-    build_gradle = replace_build_gradle_entry(build_gradle, "versionName", metadata["version"])
+    # Check if we should commit changes
+    xmlmanifest: bytes = xml.etree.ElementTree.tostring(manifest.getroot(), "UTF-8", "xml")
+    if commit:
+        print("Writing new AndroidManifest.xml")
+        with open(f"{love_android}/app/src/main/AndroidManifest.xml", "wb") as f:
+            f.write(xmlmanifest)
+    else:
+        print("AndroidManifest.xml")
+        print(str(xmlmanifest, "UTF-8"))
+
+
+def replace_gradle_properties(gradle_properties: list[str], key: str, value: str):
+    for i in range(len(gradle_properties)):
+        line = gradle_properties[i]
+        if line.find(key + "=") != -1:
+            gradle_properties[i] = f"{key}={value}"
+            return i
+    gradle_properties.append(f"{key}={value}")
+    return len(gradle_properties) - 1
+
+
+def modify_from_gradle_properties(love_android: str, metadata, commit: bool):
+    # Load gradle.properties
+    print("Reading gradle.properties")
+    with open(f"{love_android}/gradle.properties", "r", encoding="UTF-8", newline="") as f:
+        gradle_properties = list(f)
+
+    # Detect newline
+    newline = "\r\n" if gradle_properties[0].find("\r\n") else "\n"
+    # Remove newlines
+    gradle_properties = list(map(str.strip, gradle_properties))
+
+    # Replace keys keys
+    name_bytes: bytes = metadata["name"].encode("UTF-8")
+    name_byte_array = ",".join(map(str, name_bytes))
+    app_name = replace_gradle_properties(gradle_properties, "app.name", metadata["name"])
+    app_name_array = replace_gradle_properties(gradle_properties, "app.name_byte_array", name_byte_array)
+    replace_gradle_properties(gradle_properties, "app.application_id", metadata["android"]["packageName"])
+    replace_gradle_properties(gradle_properties, "app.version_code", metadata["android"]["versionNumber"])
+    replace_gradle_properties(gradle_properties, "app.version_name", metadata["version"])
+    replace_gradle_properties(gradle_properties, "app.orientation", metadata["android"].get("screenOrientation", "landscape"))
+
+    # Determine if `app.name` or `app.name_byte_array` should be used.
+    comment_index = app_name_array
+    for i in name_bytes:
+        if i > 128:
+            comment_index = app_name
+            break
+    gradle_properties[comment_index] = "#" + gradle_properties[comment_index]
+
+    # Write new changes
+    if commit:
+        print("Writing new gradle.properties")
+        with open(f"{love_android}/gradle.properties", "wb") as f:
+            f.write(newline.join(gradle_properties).encode("UTF-8"))
+    else:
+        print("gradle.properties")
+        for line in gradle_properties:
+            print(line)
+
+
+def should_replace_from_gradle_properties(love_android: str):
+    with open(f"{love_android}/app/build.gradle", "r", encoding="UTF-8") as f:
+        build_gradle = f.read().replace("\r\n", "\n")
+    return build_gradle.find("applicationId project.properties[\"app.application_id\"]") != -1
+
+
+def main():
+    love_android = os.getenv("LOVEANDROID")
+    # Env check
+    if love_android is None:
+        raise Exception("Need LOVEANDROID environment variable")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--commit", action="store_true", help="Actually commit changes to files!")
+    parser.add_argument(
+        "--get-icon-path", action="store_true", help='Output icon path as "icon" variable to GitHub Actions.'
+    )
+    args = parser.parse_args()
+
+    # Load metadata
+    print("Reading metadata")
+    metadata = load_metadata("metadata.json")
+    if "useMicrophone" not in metadata["android"] or metadata["android"]["useMicrophone"] is None:
+        metadata["android"]["useMicrophone"] = determine_micuse_from_conf("game/conf.lua")
+
     # Check icon path output
     if args.get_icon_path:
         appicon = metadata["android"]["icon"] or ""
         print(f"::set-output name=icon::{appicon}")
-    # Check if we should commit changes
-    xmlmanifest = xml.etree.ElementTree.tostring(manifest.getroot(), "UTF-8", "xml")
-    if args.commit:
-        print("Writing new AndroidManifest.xml")
-        with open(f"{love_android}/app/src/main/AndroidManifest.xml", "wb") as f:
-            f.write(xmlmanifest)
-        print("Writing new build.gradle")
-        with open(f"{love_android}/app/build.gradle", "w", encoding="UTF-8") as f:
-            f.write(build_gradle)
+
+    if should_replace_from_gradle_properties(love_android):
+        # Modify app config from gradle.properties
+        modify_from_gradle_properties(love_android, metadata, args.commit)
     else:
-        print("AndroidManifest.xml")
-        print(str(xmlmanifest, "UTF-8"))
-        print("build.gradle")
-        print(build_gradle)
+        # Modify app name from manifest
+        modify_app_name_from_manifest(love_android, metadata, args.commit)
+        # Modify app/build.gradle
+        modify_app_build_gradle(love_android, metadata, args.commit)
+
     # Write build flavors variable
     if metadata["android"]["useMicrophone"]:
         print(f"::set-output name=apk::assembleEmbedRecordDebug")
@@ -137,3 +216,7 @@ if __name__ == "__main__":
         print(
             f"::set-output name=aabpath::love-android/app/build/outputs/bundle/embedNoRecordRelease/app-embed-noRecord-release.aab"
         )
+
+
+if __name__ == "__main__":
+    main()
